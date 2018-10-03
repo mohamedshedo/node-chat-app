@@ -6,7 +6,7 @@ const socketIO=require('socket.io');
 const publicPath=path.join(__dirname,'../public');
 let port =process.env.PORT||3000;
 const app = express();
-
+const {generateMessage}=require('./utils/message');
 let server = http.createServer(app);
 let io= socketIO(server);
 app.use(express.static(publicPath));
@@ -16,17 +16,19 @@ io.on('connection',(socket)=>{
     socket.on("disconnect",()=>{
         console.log('user disconnected');
     });
+
+    socket.emit('newMessage',generateMessage('admin','hello there'));
+    socket.broadcast.emit('newMessage',generateMessage("admin",'a new member joined'));
+
   socket.on('createMessage',(newMessage)=>{
-      io.emit('newMessage',{
-          from:newMessage.from+'io',
-          text:newMessage.txt,
-          createdAt:new Date().getTime()
-      });
-      socket.broadcast.emit('newMessage',{
-        from:newMessage.from+'broadcast',
-        text:newMessage.text,
-        createdAt:new Date().getTime()
-    });
+      io.emit('newMessage',generateMessage(
+        newMessage.from+'broadcast',
+        newMessage.text
+    ));
+      socket.broadcast.emit('newMessage',generateMessage(
+        newMessage.from+'broadcast',
+        newMessage.text
+    ));
       console.log( newMessage);
   });
 });
