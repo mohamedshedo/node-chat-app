@@ -20,9 +20,9 @@ io.on('connection',(socket)=>{
     socket.emit('newMessage',generateMessage('admin','hello there'));
     socket.broadcast.emit('newMessage',generateMessage("admin",'a new member joined'));
 
-  socket.on('createMessage',(newMessage)=>{
+  socket.on('createMessage',(newMessage,callback)=>{
       io.emit('newMessage',generateMessage(
-        newMessage.from+'broadcast',
+        newMessage.from+'io',
         newMessage.text
     ));
       socket.broadcast.emit('newMessage',generateMessage(
@@ -30,6 +30,7 @@ io.on('connection',(socket)=>{
         newMessage.text
     ));
       console.log( newMessage);
+      callback('this is from server');
   });
 });
 
