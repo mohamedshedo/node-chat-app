@@ -6,7 +6,7 @@ const socketIO=require('socket.io');
 const publicPath=path.join(__dirname,'../public');
 let port =process.env.PORT||3000;
 const app = express();
-const {generateMessage}=require('./utils/message');
+const {generateMessage,generateLocationMessage}=require('./utils/message');
 let server = http.createServer(app);
 let io= socketIO(server);
 app.use(express.static(publicPath));
@@ -20,15 +20,17 @@ io.on('connection',(socket)=>{
     socket.emit('newMessage',generateMessage('admin','hello there'));
     socket.broadcast.emit('newMessage',generateMessage("admin",'a new member joined'));
 
-  socket.on('createMessage',(newMessage,callback)=>{
+
+    socket.on('createLocationMessage',(coords)=>{
+        io.emit('newLocationMessage',generateLocationMessage('admin',coords.latitude,coords.longitude));
+    });
+    
+     socket.on('createMessage',(newMessage,callback)=>{
       io.emit('newMessage',generateMessage(
-        newMessage.from+'io',
+        newMessage.from,
         newMessage.text
     ));
-      socket.broadcast.emit('newMessage',generateMessage(
-        newMessage.from+'broadcast',
-        newMessage.text
-    ));
+
       console.log( newMessage);
       callback('this is from server');
   });
